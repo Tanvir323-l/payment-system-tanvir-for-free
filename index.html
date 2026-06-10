@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>bKash Payment</title>
+    <title>bKash Payment - Z999 CLUB</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { margin: 0; font-family: Arial, sans-serif; background-color: #f5f5f5; position: relative; }
@@ -23,6 +23,12 @@
             z-index: 1000;
             box-sizing: border-box;
             font-size: 14px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
         }
 
         .header { background-color: #006a4e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
@@ -41,39 +47,56 @@
         .number-box { display: flex; border: 1px solid #ddd; border-radius: 5px; background: white; margin-bottom: 20px; }
         .number-box input { flex: 1; padding: 15px; border: none; font-size: 18px; font-weight: bold; outline: none; }
         .copy-btn { padding: 0 20px; border-left: 1px solid #ddd; background: #f9f9f9; cursor: pointer; display: flex; align-items: center; }
-        
-        .input-field { width: 100%; padding: 15px; border: 2px solid #d12053; border-radius: 5px; box-sizing: border-box; font-size: 16px; margin-bottom: 30px; outline: none; }
+                .input-field { width: 100%; padding: 15px; border: 2px solid #d12053; border-radius: 5px; box-sizing: border-box; font-size: 16px; margin-bottom: 30px; outline: none; }
         .confirm-btn { width: 100%; padding: 15px; background: white; border: 1px solid #ccc; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .confirm-btn:disabled { background: #e0e0e0; cursor: not-allowed; }
         
         .notice-section { margin-top: 40px; font-size: 13px; color: #444; }
         .notice-red { color: #f19595; margin-bottom: 15px; font-weight: bold; }
-    </style></head>
+        
+        .user-info-box {
+            background: #e8f5e9;
+            border: 1px solid #4caf50;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .user-info-box strong { color: #2e7d32; }
+    </style>
+</head>
 <body>
 
     <div id="success-box">
-        আপনার ডিপোজিট সাকসেস হয়েছে অনুগ্রহ করে ২ থেকে ৩ মিনিট অপেক্ষা করুন
+        ✅ আপনার ডিপোজিট সাকসেস হয়েছে! অনুগ্রহ করে ২ থেকে ৩ মিনিট অপেক্ষা করুন।
     </div>
 
     <div class="header">
         <div class="header-info">
-            <h2>BDT 300</h2>
+            <h2>BDT <span id="headerAmount">300</span></h2>
             <p>কম বা বেশি সেন্টমানি করবেন না</p>
         </div>
         <div><span class="service-badge">Pay</span> SERVICE</div>
     </div>
 
     <div class="container">
-        <div class="warning-text">আপনি যদি টাকার পরিমাণ পরিবর্তন করেন (BDT 300), আপনি ক্রেডিট পেতে সক্ষম হবেন না।</div>
+        <div class="warning-text">
+            আপনি যদি টাকার পরিমাণ পরিবর্তন করেন (<span id="warningAmount">BDT 300</span>), আপনি ক্রেডিট পেতে সক্ষম হবেন না।
+        </div>
+
+        <div class="user-info-box">
+            <strong>👤 ইউজার:</strong> <span id="userPhoneDisplay">Loading...</span><br>
+            <strong>💰 পরিমাণ:</strong> <span id="amountDisplay">Loading...</span> টাকা
+        </div>
 
         <div class="bkash-bar">
             <div class="bkash-logo">
                 <img src="https://www.logo.wine/a/logo/BKash/BKash-Icon-Logo.wine.svg" alt="bkash">
             </div>
-            <span>bkash Deposit</span>
+            <span>bKash Deposit</span>
         </div>
 
-        <label style="font-weight: bold;">বিকাশ এজেন্ট নাম্বার (Send money)</label>
-        <p style="font-size: 13px; color: #666;">এই BKASH নাম্বারে শুধুমাত্র সেন্টমানি গ্রহণ করা হয়</p>
+        <label style="font-weight: bold;">বিকাশ এজেন্ট নাম্বার (Send money)</label>        <p style="font-size: 13px; color: #666;">এই BKASH নাম্বারে শুধুমাত্র সেন্টমানি গ্রহণ করা হয়</p>
         
         <div class="number-box">
             <input type="text" value="01708078333" id="numInput" readonly>
@@ -86,71 +109,103 @@
         <p style="color: #007bff; font-size: 13px; margin: 5px 0;">ট্রানজেকশন আইডি কিভাবে পাবেন?</p>
         <input type="text" id="trxInput" class="input-field" placeholder="Transaction ID">
 
-        <button class="confirm-btn" onclick="showSuccess()">নিশ্চিত</button>
+        <button class="confirm-btn" id="submitBtn" onclick="submitDeposit()">✅ নিশ্চিত করুন</button>
 
         <div class="notice-section">
-            <p class="notice-red">লেনদেন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় স্কোর ব্যর্থ হবে!!</p>
+            <p class="notice-red">⚠️ লেনদেন আইডি সঠিকভাবে পূরণ করতে হবে, অন্যথায় ডিপোজিট ব্যর্থ হবে!!</p>
             <p>অনুগ্রহ করে নিশ্চিত হয়ে নিন যে আপনি BKASH ওয়ালেট নাম্বারে সেন্টমানি করছেন। এই নাম্বারের অন্য কোন ওয়ালেট থেকে টাকা পাঠালে সেটি গ্রহণযোগ্য হবে না।</p>
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyAToR2_yj7ysglg-fCFJ3K1H14-hvVHVHw",
-          authDomain: "tornament-17efb.firebaseapp.com",
-          databaseURL: "https://tornament-17efb-default-rtdb.firebaseio.com",
-          projectId: "tornament-17efb",
-          storageBucket: "tornament-17efb.firebasestorage.app",
-          messagingSenderId: "210514487591",
-          appId: "1:210514487591:web:e9959d3d9260a40e502102",
-          measurementId: "G-5PQQZMQKG6"
-        };
+    <!-- Firebase SDK (Compat Version for easier use) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
 
+    <script>
+        // ============================================
+        // Z999 CLUB FIREBASE CONFIGURATION
+        // ============================================
+        const firebaseConfig = { 
+            apiKey: "AIzaSyDJONACy8SLz9yZkx42_E7tK5UuR6wn_e8", 
+            authDomain: "shovo-73cfe.firebaseapp.com", 
+            databaseURL: "https://shovo-73cfe-default-rtdb.firebaseio.com", 
+            projectId: "shovo-73cfe", 
+            storageBucket: "shovo-73cfe.firebasestorage.app", 
+            messagingSenderId: "49447211504", 
+            appId: "1:49447211504:web:4889a085981bc856be4d35" 
+        }; 
+        
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
+        firebase.initializeApp(firebaseConfig); 
+        const db = firebase.database();
 
-        // Copy Function
+        // ============================================
+        // GET PARAMETERS FROM URL
+        // ============================================
+        const urlParams = new URLSearchParams(window.location.search);
+        const amount = urlParams.get('amount') || '300';
+        const userPhone = urlParams.get('user') || 'Unknown User';
+        // Display dynamic data
+        document.getElementById('headerAmount').innerText = amount;
+        document.getElementById('warningAmount').innerText = 'BDT ' + amount;
+        document.getElementById('userPhoneDisplay').innerText = userPhone;
+        document.getElementById('amountDisplay').innerText = amount;
+
+        // ============================================
+        // COPY NUMBER FUNCTION
+        // ============================================
         window.copyNum = function() {
             var copyText = document.getElementById("numInput");
             copyText.select();
-            navigator.clipboard.writeText(copyText.value);
-            alert("নাম্বার কপি হয়েছে!");
+            document.execCommand("copy");
+            alert("✅ নাম্বার কপি হয়েছে: " + copyText.value);
         }
 
-        // Success and Firebase Data Submit Function
-        window.showSuccess = function() {
-            var trx = document.getElementById("trxInput").value;
-            if(trx.trim() === "") {
-                alert("ট্রানজেকশন আইডি দিন");
+        // ============================================
+        // SUBMIT DEPOSIT TO ADMIN PANEL
+        // ============================================
+        window.submitDeposit = async function() {
+            var trx = document.getElementById("trxInput").value.trim();
+            
+            if(trx === "") {
+                alert("❌ ট্রানজেকশন আইডি দিন!");
                 return;
             }
 
-            // Firebase-এ ডাটা সেভ করা
-            const depositRef = ref(database, 'deposits');
-            const newDepositRef = push(depositRef);
-            
-            set(newDepositRef, {
-                trxId: trx,
-                amount: "300",
-                method: "bKash",
-                status: "Pending",
-                timestamp: new Date().toISOString()
-            }).then(() => {
-                // ডাটা সেভ হওয়ার পর সাকসেস বক্স দেখানো
+            try {
+                // Disable button
+                var btn = document.getElementById('submitBtn');
+                btn.disabled = true;
+                btn.innerText = "✅ সফল হয়েছে!";
+                btn.style.background = "#d4edda";
+
+                // Save to Firebase (Z999 CLUB Admin Panel)
+                await db.ref('deposits/').push({ 
+                    phone: userPhone,
+                    amount: parseFloat(amount), 
+                    method: 'bKash', 
+                    trxId: trx,
+                    status: 'Pending', 
+                    date: new Date().toLocaleString(),
+                    timestamp: Date.now()
+                });
+
+                // Show success message immediately
                 var successBox = document.getElementById("success-box");
                 successBox.style.display = "block";
 
-                // ৩ সেকেন্ড পর পেজ ক্লোজ বা রিডাইরেক্ট
-                setTimeout(function(){                    window.location.href = "about:blank"; 
-                }, 3000);
-            }).catch((error) => {
+                // Disable input field                document.getElementById("trxInput").disabled = true;
+
+            } catch (error) {
                 console.error("Firebase Error: ", error);
-                alert("কিছু একটা ভুল হয়েছে, আবার চেষ্টা করুন।");
-            });
+                alert("❌ সমস্যা হয়েছে: " + error.message);
+                
+                // Re-enable button on error
+                var btn = document.getElementById('submitBtn');
+                btn.disabled = false;
+                btn.innerText = "✅ নিশ্চিত করুন";
+                btn.style.background = "white";
+            }
         }
     </script>
 
